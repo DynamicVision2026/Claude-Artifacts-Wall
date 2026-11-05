@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Detail · Product Wall</title>
+<style>
+:root{--bg:#F2F4F7;--surface:#fff;--ink:#1B2230;--muted:#5B6577;--line:#DDE2EA;--accent:#2B5FD9;
+ --sans:"Zen Kaku Gothic New","Hiragino Sans","Noto Sans JP",system-ui,sans-serif;--mono:ui-monospace,Menlo,monospace}
+@media(prefers-color-scheme:dark){:root{--bg:#12151C;--surface:#1A1F29;--ink:#E6E9EF;--muted:#9AA3B4;--line:#2B3240;--accent:#8FB0F5;color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;display:flex;flex-direction:column}
+header{background:var(--surface);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center}
+header a,article a{color:var(--accent);text-decoration:none}
+header a:hover,article a:hover{text-decoration:underline}
+h1{font-size:1.05rem;margin:0;flex:1 1 240px;min-width:0;overflow-wrap:anywhere}
+.tabs{display:flex;flex-wrap:wrap;gap:6px}
+.tabs button{font:inherit;font-size:.8rem;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:3px 10px;cursor:pointer}
+.tabs button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+.meta{color:var(--muted);font-size:.8rem;font-family:var(--mono)}
+main{flex:1;min-height:0;display:flex;flex-direction:column}
+iframe{flex:1;width:100%;border:0;background:#fff;min-height:70vh}
+article{max-width:860px;width:100%;margin:0 auto;padding:20px 16px 56px;overflow-wrap:anywhere}
+article table{border-collapse:collapse;display:block;overflow-x:auto}
+article th,article td{border:1px solid var(--line);padding:4px 8px}
+article pre{background:var(--surface);border:1px solid var(--line);padding:10px;border-radius:8px;overflow-x:auto;white-space:pre-wrap}
+article code{font-family:var(--mono);font-size:.9em}
+article blockquote{margin:0;padding-left:12px;border-left:3px solid var(--line);color:var(--muted)}
+article img{max-width:100%}
+</style>
+</head>
+<body>
+<header>
+  <a href="index.html">&larr; Wall</a>
+  <h1 id="t">Loading…</h1>
+  <span class="meta" id="m"></span>
+  <nav class="tabs" id="tabs" aria-label="Files for this card"></nav>
+  <a id="raw" target="_blank" rel="noopener">Open raw file</a>
+</header>
+<main id="main"></main>
+<script src="vendor/marked.min.js"></script>
+<script>
+const TEAMS={S:"Strategy & marketing",P:"Product & spec",C:"Content & scripts",D:"Design & visuals",R:"Review & QA",O:"Ops & status"};
+const CANVAS=/(\.dc\.html$|Beyond_Culture_Necklace\/index\.html$|ops-dashboard-preview\.html$)/;
+const id=new URLSearchParams(location.search).get("id");
+const enc=p=>"content/"+p.split("/").map(encodeURIComponent).join("/");
+const label=p=>p.split("/")[0]+" · "+p.split("/").pop().replace(/^[A-Z]?\d+_/,"").slice(0,40);
+fetch("data.json").then(r=>r.json()).then(rows=>{
+  const r=rows.find(x=>x[0]===id);
+  const t=document.getElementById("t");
+  if(!r){t.textContent="Card not found";return}
+  t.textContent=r[1];
+  document.title=r[1]+" · Product Wall";
+  document.getElementById("m").textContent=TEAMS[r[3]]+(r[4]?" · "+r[4].replace("-","/"):"");
+  const files=r[6];
+  const tabs=document.getElementById("tabs");
+  function show(i){
+    const p=files[i],url=enc(p),main=document.getElementById("main");
+    document.getElementById("raw").href=url;
+    [...tabs.children].forEach((b,j)=>b.setAttribute("aria-pressed",j===i));
+    main.textContent="";
+    if(CANVAS.test(p)){
+      fetch(url).then(x=>x.text()).then(txt=>{
+        const a=document.createElement("article");
+        const n=document.createElement("p");
+        n.append("This is a design canvas. Only its source was exported, so it can't render here. The live version is the original in Claude: ");
+        const l=document.createElement("a");
+        l.href=(id.length===36&&id.includes("-")?"https://claude.ai/code/artifact/":"https://claude.ai/artifact/")+id;
+        l.target="_blank";l.rel="noopener";l.textContent="open original";
+        n.append(l);
+        const pre=document.createElement("pre");pre.textContent=txt;
+        a.append(n,pre);main.append(a);
+      });
+    }else if(/\.md$/i.test(p)){
+      fetch(url).then(x=>x.text()).then(txt=>{
+        const a=document.createElement("article");
+        a.innerHTML=marked.parse(txt);
+        main.append(a);
+      }).catch(()=>main.textContent="Could not load file.");
+    }else{
+      const f=document.createElement("iframe");
+      f.src=url;f.title=r[1];main.append(f);
+    }
+  }
+  if(files.length>1){files.forEach((p,i)=>{const b=document.createElement("button");b.type="button";b.textContent=label(p);b.onclick=()=>show(i);tabs.append(b)})}
+  show(0);
+});
+</script>
+</body>
+</html>
