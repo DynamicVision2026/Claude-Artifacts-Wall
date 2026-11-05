@@ -1,0 +1,5 @@
+# Used by gcloud run deploy --source. Having this file stops gcloud from using .gitignore,
+# which would skip site/content (the documents).
+.git
+.gitignore
+node_modules
