@@ -1,6 +1,6 @@
 # Claude Artifacts Wall
 
-A "Product Wall" of Claude artifacts and documents, sorted into 5 areas, 16 product channels and 6 kinds of work. Each card opens its full content on a detail page. The site is a static page served by nginx on **Google Cloud Run**, locked behind a **Google login** (Identity-Aware Proxy).
+A "Product Wall" of Claude artifacts and documents, sorted into 5 areas, 16 product channels and 6 kinds of work. Each card opens its full content on a detail page. The site is a static page served by nginx on **Google Cloud Run**, locked behind a **username and password** (`deploy-password.sh`). The older Google-login route (`deploy.sh`, IAP) is described below but is not in use.
 
 ```
 site/index.html      the wall (cards, team filter, search, "check placement")
@@ -31,7 +31,7 @@ First-time notes (from Google's Cloud Run IAP guide):
 
 ## What the content is
 
-Three exports from the Claude account: Oct 5–23, a first export through Oct 6, and Oct 24 – Nov 1. Known limits:
+Four exports from the Claude account: a first export through Oct 6, Oct 5–23, Oct 24 – Nov 1, and Nov 1–10. Known limits:
 - Design canvases (Beyond Culture Necklace, Ops dashboard preview, and similar) were exported as source only. The detail page shows the source and a link to the original.
 - Some documents were rebuilt from text, so they can differ by a few bytes from the original.
 - Sorting rule: area (part of the business) → channel (product or project) → colored tag (kind of work). Every card was checked by its content; nothing is guessed.
