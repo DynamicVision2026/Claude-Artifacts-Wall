@@ -45,7 +45,7 @@ const TEAMS={S:"Strategy & marketing",P:"Product & spec",C:"Content & scripts",D
 const CANVAS=/(\.dc\.html$|Beyond_Culture_Necklace\/index\.html$|ops-dashboard-preview\.html$)/;
 const id=new URLSearchParams(location.search).get("id");
 const enc=p=>"content/"+p.split("/").map(encodeURIComponent).join("/");
-const label=p=>p.split("/")[0]+" · "+p.split("/").pop().replace(/^[A-Z]?\d+_/,"").slice(0,40);
+const label=p=>{const n=p.split("/").pop();return /\.dc\.html$/.test(n)?n.replace(/\.dc\.html$/,""):/\.pdf$/i.test(n)?"PDF":/\.md$/i.test(n)?"Text":p.split("/")[0]+" · "+n.replace(/^[A-Z]?\d+_/,"").slice(0,40)};
 fetch("data.json").then(r=>r.json()).then(rows=>{
   const r=rows.find(x=>x[0]===id);
   const t=document.getElementById("t");
